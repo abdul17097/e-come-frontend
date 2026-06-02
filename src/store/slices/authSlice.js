@@ -76,9 +76,9 @@ export const { setLoading, setError, clearError, setCredentials, logout } =
 
 export const selectCurrentUser = (state) => state.auth.user;
 export const selectCurrentToken = (state) => state.auth.token;
-export const selectIsAuthenticated = (state) =>
-  !!state.auth.token && !!state.auth.user;
+export const selectIsAuthenticated = (state) => !!state.auth.user;
 export const selectIsAdmin = (state) => state.auth.user?.role === "admin";
+
 export const selectAuthLoading = (state) => state.auth.isLoading;
 export const selectAuthError = (state) => state.auth.error;
 

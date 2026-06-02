@@ -1,32 +1,31 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import {
-  selectCurrentUser,
-  logout,
-} from "../../store/slices/authSlice";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { selectCurrentUser, logout } from "../../store/slices/authSlice";
 import { logoutUser } from "../../services/authService";
 import { toast } from "react-toastify";
 import {
   FiUsers,
   FiShoppingBag,
-  FiTrendingUp,
   FiSettings,
   FiLogOut,
   FiBox,
+  FiHome,
 } from "react-icons/fi";
 
-const stats = [
-  { label: "Total Users",  value: "1,284",  icon: FiUsers,       color: "from-violet-500 to-purple-600" },
-  { label: "Total Orders", value: "3,620",  icon: FiShoppingBag, color: "from-cyan-500 to-blue-600"     },
-  { label: "Revenue",      value: "$48.2K", icon: FiTrendingUp,  color: "from-emerald-500 to-green-600" },
-  { label: "Products",     value: "540",    icon: FiBox,         color: "from-amber-500 to-orange-500"  },
+const sidebarLinks = [
+  { label: "Dashboard", path: "/admin", icon: FiHome },
+  { label: "Products", path: "/admin/products", icon: FiBox },
+  { label: "Users", path: "/admin/users", icon: FiUsers },
+  { label: "Orders", path: "/admin/orders", icon: FiShoppingBag },
+  { label: "Settings", path: "/admin/settings", icon: FiSettings },
 ];
 
 export default function AdminDashboard() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const user     = useSelector(selectCurrentUser);
+  const user = useSelector(selectCurrentUser);
+  console.log("admin dashboard:", user);
 
   const handleLogout = async () => {
     try {
@@ -40,73 +39,83 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      <header className="border-b border-gray-800 bg-gray-900 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-lg shadow-lg shadow-indigo-900">
+    <div className="min-h-screen bg-gray-950 text-white flex">
+      {/* Sidebar */}
+      <aside className="w-64 bg-gray-900 border-r border-gray-800 flex flex-col hidden md:flex sticky top-0 h-screen">
+        <div className="p-6 border-b border-gray-800 flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-lg shadow-lg shadow-indigo-900/50">
             A
           </div>
-          <span className="font-semibold text-lg tracking-tight">Admin Panel</span>
+          <span className="font-bold text-xl tracking-tight text-white">
+            Admin Panel
+          </span>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="text-sm text-gray-400">
-            Signed in as{" "}
-            <span className="text-white font-medium">{user?.name ?? "Admin"}</span>
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          {sidebarLinks.map(({ label, path, icon: Icon }) => (
+            <NavLink
+              key={label}
+              to={path}
+              end={path === "/admin"}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${
+                  isActive
+                    ? "bg-indigo-600/10 text-indigo-400"
+                    : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+                }`
+              }
+            >
+              <Icon size={20} />
+              {label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="p-4 border-t border-gray-800">
+          <div className="flex items-center gap-3 px-4 py-3 mb-2">
+            <div className="h-8 w-8 rounded-full bg-gray-800 flex items-center justify-center">
+              {user?.name?.[0]?.toUpperCase() || "A"}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">
+                {user?.name || "Admin User"}
+              </p>
+              <p className="text-xs text-gray-400 truncate">
+                {user?.email || "admin@example.com"}
+              </p>
+            </div>
           </div>
           <button
-            id="admin-logout"
             onClick={handleLogout}
-            className="flex items-center gap-2 text-sm text-gray-400 hover:text-red-400 transition-colors"
+            className="w-full cursor-pointer flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all font-medium"
           >
-            <FiLogOut size={16} />
+            <FiLogOut size={20} />
             Logout
           </button>
         </div>
-      </header>
+      </aside>
 
-      <main className="max-w-6xl mx-auto px-6 py-10">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-gray-400 mt-1">
-            Welcome back, {user?.name}. Here's what's happening today.
-          </p>
-        </div>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-h-screen max-w-full overflow-hidden">
+        {/* Mobile Header (visible only on small screens) */}
+        <header className="md:hidden border-b border-gray-800 bg-gray-900 px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="font-semibold text-lg tracking-tight">
+              Admin Panel
+            </span>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="text-gray-400 hover:text-red-400"
+          >
+            <FiLogOut size={20} />
+          </button>
+        </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
-          {stats.map(({ label, value, icon: Icon, color }) => (
-            <div
-              key={label}
-              className="rounded-2xl bg-gray-900 border border-gray-800 p-5 flex items-center gap-4 hover:border-gray-600 transition-colors"
-            >
-              <div className={`h-12 w-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center shadow-lg`}>
-                <Icon size={20} />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{value}</p>
-                <p className="text-sm text-gray-400">{label}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          {[
-            { label: "Manage Users",    icon: FiUsers,    desc: "View, edit, or remove users"      },
-            { label: "Manage Products", icon: FiBox,      desc: "Add, update, or delete products"  },
-            { label: "Settings",        icon: FiSettings, desc: "Platform configuration"           },
-          ].map(({ label, icon: Icon, desc }) => (
-            <button
-              key={label}
-              className="text-left rounded-2xl bg-gray-900 border border-gray-800 p-5 hover:border-indigo-500 hover:bg-gray-800 transition-all group"
-            >
-              <Icon size={22} className="text-indigo-400 mb-3 group-hover:scale-110 transition-transform" />
-              <p className="font-semibold">{label}</p>
-              <p className="text-sm text-gray-400 mt-1">{desc}</p>
-            </button>
-          ))}
-        </div>
-      </main>
+        <main className="flex-1 p-6 md:p-8 overflow-y-auto">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }

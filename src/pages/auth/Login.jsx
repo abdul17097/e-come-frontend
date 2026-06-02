@@ -58,17 +58,17 @@ export default function Login() {
     dispatch(setLoading(true));
 
     try {
-      const data = await loginUser(formData);
+      const { success, data, message } = await loginUser(formData);
 
-      if (data.success) {
-        dispatch(setCredentials({ user: data.user, token: data.token }));
-        toast.success(data.message || "Login successful!");
-        navigate(data.user?.role === "admin" ? "/admin" : "/", {
+      if (success) {
+        dispatch(setCredentials({ user: data, token: null }));
+        toast.success(message || "Login successful!");
+        navigate(data?.role === "admin" ? "/admin" : "/", {
           replace: true,
         });
       } else {
-        dispatch(setError(data.message || "Login failed."));
-        toast.error(data.message || "Login failed.");
+        dispatch(setError(message || "Login failed."));
+        toast.error(message || "Login failed.");
       }
     } catch (err) {
       const message =

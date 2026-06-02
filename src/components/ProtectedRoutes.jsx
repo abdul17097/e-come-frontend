@@ -6,6 +6,17 @@ import {
   selectIsAdmin,
 } from "../store/slices/authSlice";
 
+export const PublicRoute = () => {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const isAdmin = useSelector(selectIsAdmin);
+
+  if (isAuthenticated) {
+    return <Navigate to={isAdmin ? "/admin" : "/"} replace />;
+  }
+
+  return <Outlet />;
+};
+
 export const ProtectedRoute = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
 
@@ -18,13 +29,14 @@ export const ProtectedRoute = () => {
 
 export const AdminRoute = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
-  const isAdmin = useSelector(selectIsAdmin);
+  const { user } = useSelector(selectIsAdmin);
+  console.log(user);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  if (!isAdmin) {
+  if (!user === "admin") {
     return <Navigate to="/" replace />;
   }
 

@@ -14,13 +14,13 @@ import {
 import { signupUser } from "../../services/authService";
 
 export default function Signup() {
-  const dispatch  = useDispatch();
-  const navigate  = useNavigate();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const isLoading = useSelector(selectAuthLoading);
-  const apiError  = useSelector(selectAuthError);
+  const apiError = useSelector(selectAuthError);
 
-  const [formData, setFormData]         = useState({ name: "", email: "", password: "" });
-  const [errors, setErrors]             = useState({});
+  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
+  const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {

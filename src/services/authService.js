@@ -11,7 +11,7 @@ export const signupUser = async ({ name, email, password }) => {
 };
 
 export const logoutUser = async () => {
-  await api.post("/auth/logout");
+  await api.delete("/auth/logout");
 };
 
 export const getMe = async () => {
