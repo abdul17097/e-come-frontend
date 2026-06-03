@@ -7,6 +7,11 @@ export const getAllProducts = async () => {
   return data;
 };
 
+export const getAllProductsPublic = async (params = {}) => {
+  const { data } = await api.get("/products", { params });
+  return data;
+};
+
 export const getProductById = async (id) => {
   const { data } = await api.get(`/products/${id}`);
   return data;
@@ -33,5 +38,10 @@ export const updateProduct = async (productId, formData) => {
 
 export const deleteProduct = async (productId) => {
   const { data } = await api.delete(`/products/${productId}`);
+  return data;
+};
+
+export const submitReview = async (productId, reviewData) => {
+  const { data } = await api.post(`/products/review/${productId}`, reviewData);
   return data;
 };

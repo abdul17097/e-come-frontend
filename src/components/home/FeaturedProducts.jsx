@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FiHeart, FiShoppingCart, FiStar, FiArrowRight, FiEye } from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi2";
+import { getAllProductsPublic } from "../../services/productService";
 
 const FILTERS = ["All", "New Arrivals", "Best Sellers", "On Sale", "Top Rated"];
 
@@ -127,14 +128,18 @@ function ProductCard({ product }) {
     : null;
 
   return (
-    <div className="group bg-white rounded-2xl border border-gray-100 overflow-hidden card-hover shadow-sm">
-      <div className={`relative bg-gradient-to-br ${product.gradient} aspect-square flex items-center justify-center overflow-hidden`}>
-        <span className="text-7xl group-hover:scale-110 transition-transform duration-500 select-none">
-          {product.emoji}
-        </span>
+    <div className="group bg-white rounded-2xl border border-gray-100 overflow-hidden card-hover shadow-sm flex flex-col h-full">
+      <div className={`relative bg-gray-50 aspect-square flex items-center justify-center overflow-hidden`}>
+        {product.image ? (
+          <img src={product.image} alt={product.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+        ) : (
+          <span className="text-7xl group-hover:scale-110 transition-transform duration-500 select-none">
+            📦
+          </span>
+        )}
 
-        <span className={`absolute top-3 left-3 product-badge text-white ${product.badgeColor}`}>
-          {product.badge}
+        <span className={`absolute top-3 left-3 product-badge text-white ${product.stock > 0 ? 'bg-emerald-500' : 'bg-rose-500'}`}>
+          {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
         </span>
         {discount && (
           <span className="absolute top-3 right-3 product-badge bg-white text-rose-600 border border-rose-100">
@@ -157,19 +162,22 @@ function ProductCard({ product }) {
             <FiShoppingCart size={15} />
             Add to Cart
           </button>
-          <button className="flex-none w-10 h-10 bg-white hover:bg-gray-100 text-gray-600 rounded-xl flex items-center justify-center transition-all shadow-md">
+          <Link
+            to={`/product/${product._id}`}
+            className="flex-none w-10 h-10 bg-white hover:bg-gray-100 text-gray-600 rounded-xl flex items-center justify-center transition-all shadow-md"
+          >
             <FiEye size={16} />
-          </button>
+          </Link>
         </div>
       </div>
 
-      <div className="p-4">
+      <div className="p-4 flex flex-col flex-grow">
         <p className="text-[11px] text-indigo-600 font-semibold uppercase tracking-wider mb-1">
-          {product.brand}
+          {product.category || "General"}
         </p>
-        <Link to={`/product/${product.id}`}>
+        <Link to={`/product/${product._id}`}>
           <h3 className="text-sm font-bold text-gray-900 mb-2 hover:text-indigo-600 transition-colors line-clamp-1">
-            {product.name}
+            {product.title}
           </h3>
         </Link>
 
@@ -180,7 +188,7 @@ function ProductCard({ product }) {
                 key={i}
                 size={12}
                 className={
-                  i < Math.floor(product.rating)
+                  i < Math.floor(product.rating || 0)
                     ? "text-amber-400 fill-amber-400"
                     : "text-gray-200 fill-gray-200"
                 }
@@ -188,19 +196,19 @@ function ProductCard({ product }) {
             ))}
           </div>
           <span className="text-xs text-gray-500 font-medium">
-            {product.rating} ({product.reviews.toLocaleString()})
+            {product.rating ? product.rating.toFixed(1) : 0} ({product.reviews?.length || 0})
           </span>
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mt-auto">
           <div className="flex items-baseline gap-2">
             <span className="text-lg font-black text-gray-900">
               ${product.price.toFixed(2)}
             </span>
             {product.originalPrice && (
-              <span className="text-sm text-gray-400 line-through">
-                ${product.originalPrice.toFixed(2)}
-              </span>
+               <span className="text-sm text-gray-400 line-through">
+                 ${product.originalPrice.toFixed(2)}
+               </span>
             )}
           </div>
         </div>
@@ -211,11 +219,28 @@ function ProductCard({ product }) {
 
 export default function FeaturedProducts() {
   const [activeFilter, setActiveFilter] = useState("All");
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await getAllProductsPublic();
+        if (response.success) {
+          setProducts(response.data.products);
+        }
+      } catch (error) {
+        console.error("Failed to fetch products", error);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const FILTERS = ["All", ...new Set(products.map(p => p.category).filter(Boolean))];
 
   const filtered =
     activeFilter === "All"
-      ? PRODUCTS
-      : PRODUCTS.filter((p) => p.tag === activeFilter);
+      ? products
+      : products.filter((p) => p.category === activeFilter);
 
   return (
     <section className="py-20 bg-white">
@@ -259,9 +284,9 @@ export default function FeaturedProducts() {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-          {filtered.map((product, i) => (
+          {filtered.slice(0, 8).map((product, i) => (
             <div
-              key={product.id}
+              key={product._id}
               className="animate-fade-in-up"
               style={{ animationDelay: `${i * 0.06}s` }}
             >

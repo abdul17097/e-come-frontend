@@ -3,7 +3,9 @@ import Layout from "./components/layout/Layout";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import Home from "./pages/public/Home";
+import Shop from "./pages/public/Shop";
 import Cart from "./pages/public/Cart";
+import ProductDetail from "./pages/public/ProductDetail";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminOverview from "./pages/admin/AdminOverview";
 import AdminProducts from "./pages/admin/AdminProducts";
@@ -27,6 +29,22 @@ function App() {
         element={
           <Layout>
             <Home />
+          </Layout>
+        }
+      />
+      <Route
+        path="/shop"
+        element={
+          <Layout>
+            <Shop />
+          </Layout>
+        }
+      />
+      <Route
+        path="/product/:id"
+        element={
+          <Layout>
+            <ProductDetail />
           </Layout>
         }
       />

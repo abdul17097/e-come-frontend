@@ -1,71 +1,56 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FiArrowRight } from "react-icons/fi";
+import { getAllProductsPublic } from "../../services/productService";
 
-const CATEGORIES = [
-  {
-    name: "Fashion",
-    desc: "Clothing & Apparel",
-    emoji: "👗",
-    count: "12K+ items",
-    gradient: "from-pink-500 to-rose-600",
-    bg: "from-pink-50 to-rose-50",
-    border: "border-pink-100",
-    to: "/shop?category=fashion",
-  },
-  {
-    name: "Electronics",
-    desc: "Gadgets & Devices",
-    emoji: "📱",
-    count: "8K+ items",
-    gradient: "from-blue-500 to-cyan-600",
-    bg: "from-blue-50 to-cyan-50",
-    border: "border-blue-100",
-    to: "/shop?category=electronics",
-  },
-  {
-    name: "Home & Living",
-    desc: "Decor & Furniture",
-    emoji: "🛋️",
-    count: "6K+ items",
-    gradient: "from-amber-500 to-orange-600",
-    bg: "from-amber-50 to-orange-50",
-    border: "border-amber-100",
-    to: "/shop?category=home",
-  },
-  {
-    name: "Sports",
-    desc: "Fitness & Outdoors",
-    emoji: "🏋️",
-    count: "4K+ items",
-    gradient: "from-emerald-500 to-green-600",
-    bg: "from-emerald-50 to-green-50",
-    border: "border-emerald-100",
-    to: "/shop?category=sports",
-  },
-  {
-    name: "Beauty",
-    desc: "Skincare & Makeup",
-    emoji: "💄",
-    count: "5K+ items",
-    gradient: "from-violet-500 to-purple-600",
-    bg: "from-violet-50 to-purple-50",
-    border: "border-violet-100",
-    to: "/shop?category=beauty",
-  },
-  {
-    name: "Accessories",
-    desc: "Bags, Watches & More",
-    emoji: "⌚",
-    count: "9K+ items",
-    gradient: "from-indigo-500 to-blue-600",
-    bg: "from-indigo-50 to-blue-50",
-    border: "border-indigo-100",
-    to: "/shop?category=accessories",
-  },
+const DEFAULT_STYLES = [
+  { emoji: "👗", gradient: "from-pink-500 to-rose-600", bg: "from-pink-50 to-rose-50", border: "border-pink-100" },
+  { emoji: "📱", gradient: "from-blue-500 to-cyan-600", bg: "from-blue-50 to-cyan-50", border: "border-blue-100" },
+  { emoji: "🛋️", gradient: "from-amber-500 to-orange-600", bg: "from-amber-50 to-orange-50", border: "border-amber-100" },
+  { emoji: "🏋️", gradient: "from-emerald-500 to-green-600", bg: "from-emerald-50 to-green-50", border: "border-emerald-100" },
+  { emoji: "💄", gradient: "from-violet-500 to-purple-600", bg: "from-violet-50 to-purple-50", border: "border-violet-100" },
+  { emoji: "⌚", gradient: "from-indigo-500 to-blue-600", bg: "from-indigo-50 to-blue-50", border: "border-indigo-100" },
+  { emoji: "📦", gradient: "from-gray-500 to-slate-600", bg: "from-gray-50 to-slate-50", border: "border-gray-100" }
 ];
 
 export default function CategoriesSection() {
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getAllProductsPublic();
+        if (response.success && response.data.products) {
+          const products = response.data.products;
+          const categoryCounts = {};
+          products.forEach(p => {
+            if (p.category) {
+              categoryCounts[p.category] = (categoryCounts[p.category] || 0) + 1;
+            }
+          });
+          
+          const realCategories = Object.keys(categoryCounts).map((catName, index) => {
+            const style = DEFAULT_STYLES[index % DEFAULT_STYLES.length];
+            return {
+              name: catName,
+              desc: `Explore ${catName}`,
+              emoji: style.emoji,
+              count: `${categoryCounts[catName]} item${categoryCounts[catName] > 1 ? 's' : ''}`,
+              gradient: style.gradient,
+              bg: style.bg,
+              border: style.border,
+              to: `/shop?category=${catName}`,
+            };
+          });
+          setCategories(realCategories);
+        }
+      } catch (error) {
+        console.error("Failed to fetch products for categories", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   return (
     <section className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -91,7 +76,7 @@ export default function CategoriesSection() {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {CATEGORIES.map(({ name, desc, emoji, count, gradient, bg, border, to }, i) => (
+          {categories.map(({ name, desc, emoji, count, gradient, bg, border, to }, i) => (
             <Link
               key={name}
               to={to}
